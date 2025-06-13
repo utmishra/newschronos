@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import FilterBar from "./filter-bar";
-import NewsArticleCard from "./news-article-card";
-import type { SearchFilters, SearchResponse } from "@/lib/types";
+import type { SearchFilters, TimelineSummary, TimelineEntry } from "@/lib/types";
 
 interface NewsTimelineProps {
   searchFilters: SearchFilters;
@@ -13,10 +11,9 @@ interface NewsTimelineProps {
 }
 
 export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTimelineProps) {
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const { data: searchResults, isLoading, error } = useQuery<SearchResponse>({
-    queryKey: ["/api/news/search", searchFilters.query, searchFilters.sources, searchFilters.daysBack],
+  const { data: timeline, isLoading, error } = useQuery<TimelineSummary>({
+    queryKey: ["/api/news/timeline", searchFilters.query, searchFilters.sources, searchFilters.daysBack],
     queryFn: async () => {
       const params = new URLSearchParams({
         query: searchFilters.query,
@@ -27,31 +24,18 @@ export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTim
         params.append('sources', searchFilters.sources.join(','));
       }
       
-      const response = await fetch(`/api/news/search?${params}`);
+      const response = await fetch(`/api/news/timeline?${params}`);
       if (!response.ok) {
         throw new Error('Failed to fetch news');
       }
-      
+
       const data = await response.json();
-      
-      // Convert date strings back to Date objects
-      data.articles = data.articles.map((article: any) => ({
-        ...article,
-        publishedAt: new Date(article.publishedAt),
-      }));
-      
+
       return data;
     },
     enabled: !!searchFilters.query,
   });
 
-  const handleLoadMore = async () => {
-    setIsLoadingMore(true);
-    // Simulate loading more articles
-    setTimeout(() => {
-      setIsLoadingMore(false);
-    }, 1500);
-  };
 
   if (error) {
     return (
@@ -118,15 +102,15 @@ export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTim
             </div>
           ))}
         </div>
-      ) : searchResults ? (
+      ) : timeline ? (
         <>
           <FilterBar
             searchFilters={searchFilters}
-            resultCount={searchResults.resultCount}
+            resultCount={timeline.resultCount}
             onFiltersChange={onFiltersChange}
           />
 
-          {searchResults.articles.length === 0 ? (
+          {timeline.entries.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
               <div className="text-gray-400 mb-4">
                 <span className="text-4xl">📰</span>
@@ -150,33 +134,34 @@ export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTim
             </div>
           ) : (
             <div className="space-y-6">
-              {searchResults.articles.map((article) => (
-                <NewsArticleCard key={article.id} article={article} />
-              ))}
-
-              <div className="text-center py-8">
-                <Button
-                  onClick={handleLoadMore}
-                  disabled={isLoadingMore}
-                  variant="outline"
-                  className="bg-white border border-gray-300 text-gray-700 px-6 py-3 hover:bg-gray-50"
-                >
-                  {isLoadingMore ? (
-                    <>
-                      <Loader2 className="mr-2 animate-spin" size={16} />
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2" size={16} />
-                      Load More Articles
-                    </>
+              {timeline.entries.map((entry: TimelineEntry) => (
+                <div key={entry.date + entry.mainTitle} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex">
+                  {entry.coverImage && (
+                    <div className="w-48 hidden sm:block mr-6">
+                      <img
+                        src={entry.coverImage}
+                        alt={entry.mainTitle}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { const t = e.target as HTMLImageElement; t.style.display = 'none'; }}
+                      />
+                    </div>
                   )}
-                </Button>
-                <p className="text-sm text-gray-500 mt-2">
-                  Showing {searchResults.articles.length} of {searchResults.resultCount} articles
-                </p>
-              </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-500 mb-1">{new Date(entry.date).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
+                    <h3 className="text-xl font-semibold text-news-text mb-2">{entry.mainTitle}</h3>
+                    <p className="text-gray-700 mb-3">{entry.description}</p>
+                    <ul className="list-disc list-inside text-news-blue text-sm">
+                      {entry.sources.map((src) => (
+                        <li key={src.url}>
+                          <a href={src.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            {src.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </>

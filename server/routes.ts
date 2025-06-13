@@ -70,6 +70,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Aggregated timeline summary using OpenAI
+  app.get("/api/news/timeline", async (req, res) => {
+    try {
+      const { query, sources, daysBack } = req.query;
+
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ message: "Query parameter is required" });
+      }
+
+      const sourcesArray = sources
+        ? (typeof sources === 'string' ? sources.split(',') : (sources as string[]))
+        : undefined;
+
+      const daysBackNum = daysBack ? parseInt(daysBack as string) : 7;
+
+      const scrapedArticles = await newsAPI.searchNews(query, daysBackNum);
+
+      const filteredArticles =
+        sourcesArray && sourcesArray.length > 0
+          ? scrapedArticles.filter((article: any) => sourcesArray.includes(article.source))
+          : scrapedArticles;
+
+      const articles = filteredArticles.map((article: any, index: number) => ({
+        id: Date.now() + index,
+        title: article.title,
+        excerpt: article.excerpt,
+        content: article.content,
+        source: article.source,
+        author: article.author || null,
+        publishedAt: article.publishedAt,
+        imageUrl: article.imageUrl || null,
+        articleUrl: article.articleUrl,
+        tags: article.tags,
+        views: Math.floor(Math.random() * 10000) + 1000,
+        shares: Math.floor(Math.random() * 500) + 50,
+        topic: article.topic,
+      }));
+
+      await storage.createSearchQuery({
+        query,
+        resultCount: articles.length,
+      });
+
+      const { summarizeTimeline } = await import('./summarizer.js');
+      const summary = await summarizeTimeline(articles);
+
+      res.json({
+        entries: summary.entries,
+        query,
+        resultCount: articles.length,
+        sources: sourcesArray,
+        daysBack: daysBackNum,
+      });
+    } catch (error) {
+      console.error('Timeline error:', error);
+      res.status(500).json({ message: 'Failed to build timeline summary.' });
+    }
+  });
+
   // Get news by topic
   app.get("/api/news/topic/:topic", async (req, res) => {
     try {
