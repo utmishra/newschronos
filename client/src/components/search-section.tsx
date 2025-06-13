@@ -24,15 +24,13 @@ export default function SearchSection({ onSearch }: SearchSectionProps) {
     
     setIsSearching(true);
     
-    // Simulate API delay
-    setTimeout(() => {
-      onSearch({
-        query: query.trim(),
-        sources: [],
-        daysBack,
-      });
-      setIsSearching(false);
-    }, 1500);
+    // Real-time scraping takes longer, so we'll let the timeline component handle the loading
+    onSearch({
+      query: query.trim(),
+      sources: [],
+      daysBack,
+    });
+    setIsSearching(false);
   };
 
   const handlePopularSearch = (searchQuery: string) => {
@@ -56,7 +54,10 @@ export default function SearchSection({ onSearch }: SearchSectionProps) {
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-news-text mb-4">Track Any News Topic</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Monitor breaking news and developments from trusted sources including The Guardian, NYT, The Verge, and Wired
+            Real-time news scraping from The Guardian, New York Times, The Verge, and Wired
+          </p>
+          <p className="text-sm text-trust-green mt-2 font-medium">
+            Live data - freshly scraped from news sources
           </p>
         </div>
 

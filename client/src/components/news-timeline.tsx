@@ -79,10 +79,18 @@ export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTim
     <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {isLoading ? (
         <div className="space-y-6">
-          {/* Filter bar skeleton */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <Skeleton className="h-4 w-64 mb-2" />
-            <Skeleton className="h-4 w-32" />
+          {/* Real-time scraping notice */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+            <div className="flex items-center justify-center mb-4">
+              <Loader2 className="animate-spin text-news-blue mr-3" size={24} />
+              <h3 className="text-lg font-semibold text-news-blue">Scraping Live News</h3>
+            </div>
+            <p className="text-gray-600 mb-3">
+              Fetching the latest articles from The Guardian, New York Times, The Verge, and Wired
+            </p>
+            <p className="text-sm text-gray-500">
+              This may take 10-30 seconds as we search across multiple news sources
+            </p>
           </div>
           
           {/* Article skeletons */}

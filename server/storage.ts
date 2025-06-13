@@ -142,11 +142,21 @@ export class MemStorage implements IStorage {
     
     const articles = Array.from(this.newsArticles.values())
       .filter(article => {
-        const matchesQuery = 
-          article.title.toLowerCase().includes(query.toLowerCase()) ||
-          article.excerpt.toLowerCase().includes(query.toLowerCase()) ||
-          article.topic.toLowerCase().includes(query.toLowerCase()) ||
-          article.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
+        // More flexible search matching
+        const queryLower = query.toLowerCase();
+        const queryWords = queryLower.split(/\s+/).filter(word => word.length > 2);
+        
+        const searchableText = [
+          article.title.toLowerCase(),
+          article.excerpt.toLowerCase(),
+          article.topic.toLowerCase(),
+          article.content.toLowerCase(),
+          ...article.tags.map(tag => tag.toLowerCase())
+        ].join(' ');
+        
+        // Match if any query word is found, or if the full query is found
+        const matchesQuery = queryWords.some(word => searchableText.includes(word)) ||
+                           searchableText.includes(queryLower);
         
         const matchesSource = !sources || sources.length === 0 || sources.includes(article.source);
         const withinDateRange = article.publishedAt >= cutoffDate;
