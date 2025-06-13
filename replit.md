@@ -91,8 +91,13 @@ The application uses two main tables:
 
 ## Changelog
 
-Changelog:
-- June 13, 2025. Initial setup
+Recent Changes:
+- June 13, 2025: Implemented real-time news scraping using Brave Search API
+- June 13, 2025: Added live data fetching from trusted news sources (BBC, Guardian, NYT, Bloomberg, etc.)
+- June 13, 2025: Enhanced loading states with scraping progress indicators
+- June 13, 2025: Configured flexible search matching for better results
+- June 13, 2025: Integrated comprehensive error handling for API failures
+- June 13, 2025: Initial setup
 
 ## User Preferences
 
