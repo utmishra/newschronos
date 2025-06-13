@@ -33,11 +33,11 @@ interface BraveSearchResponse {
   };
 }
 
-export class NewsScraper {
+export class NewsAPI {
   private readonly apiKey = process.env.BRAVE_SEARCH_API_KEY;
   private readonly baseUrl = 'https://api.search.brave.com/res/v1/news/search';
   
-  async scrapeNews(query: string, daysBack: number = 7): Promise<ScrapedArticle[]> {
+  async searchNews(query: string, daysBack: number = 7): Promise<ScrapedArticle[]> {
     if (!this.apiKey) {
       console.error('Brave Search API key not found');
       return [];
@@ -67,7 +67,7 @@ export class NewsScraper {
         return [];
       }
 
-      const articles = response.data.news.results.map((result, index) => {
+      const articles = response.data.news.results.map((result) => {
         const source = this.extractSource(result.meta_url?.hostname || result.url);
         const publishedAt = this.parseDate(result.page_age) || new Date();
         
@@ -78,7 +78,7 @@ export class NewsScraper {
           source,
           publishedAt,
           articleUrl: result.url,
-          tags: this.extractTags(result.title + ' ' + result.description),
+          tags: this.extractTags(result.title + ' ' + (result.description || '')),
           topic: query,
           imageUrl: result.thumbnail?.src
         };
@@ -186,4 +186,4 @@ export class NewsScraper {
   }
 }
 
-export const newsScraper = new NewsScraper();
+export const newsAPI = new NewsAPI();

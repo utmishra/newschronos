@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { newsScraper } from "./scraper";
+import { newsAPI } from "./news-api";
 import { insertSearchQuerySchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -24,16 +24,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`[${new Date().toISOString()}] Scraping news for query: "${query}"`);
       
-      // Scrape real news articles
-      const scrapedArticles = await newsScraper.scrapeNews(query, daysBackNum);
+      // Search real news articles using Brave Search API
+      const scrapedArticles = await newsAPI.searchNews(query, daysBackNum);
       
       // Filter by sources if specified
       const filteredArticles = sourcesArray && sourcesArray.length > 0 
-        ? scrapedArticles.filter(article => sourcesArray.includes(article.source))
+        ? scrapedArticles.filter((article: any) => sourcesArray.includes(article.source))
         : scrapedArticles;
       
       // Convert scraped articles to the expected format
-      const articles = filteredArticles.map((article, index) => ({
+      const articles = filteredArticles.map((article: any, index: number) => ({
         id: Date.now() + index, // Generate temporary ID
         title: article.title,
         excerpt: article.excerpt,
