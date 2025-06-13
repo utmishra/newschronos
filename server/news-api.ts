@@ -28,14 +28,14 @@ interface BraveNewsResult {
 }
 
 interface BraveSearchResponse {
-  news?: {
+  web?: {
     results: BraveNewsResult[];
   };
 }
 
 export class NewsAPI {
   private readonly apiKey = process.env.BRAVE_SEARCH_API_KEY;
-  private readonly baseUrl = 'https://api.search.brave.com/res/v1/news/search';
+  private readonly baseUrl = 'https://api.search.brave.com/res/v1/web/search';
   
   async searchNews(query: string, daysBack: number = 7): Promise<ScrapedArticle[]> {
     if (!this.apiKey) {
@@ -45,8 +45,9 @@ export class NewsAPI {
 
     try {
       console.log(`[${new Date().toISOString()}] Searching Brave News API for: "${query}"`);
+      console.log(`API Key present: ${!!this.apiKey}`);
       
-      const response = await axios.get<BraveSearchResponse>(this.baseUrl, {
+      const requestConfig = {
         headers: {
           'X-Subscription-Token': this.apiKey,
           'Accept': 'application/json'
@@ -60,14 +61,23 @@ export class NewsAPI {
           country: 'US'
         },
         timeout: 15000
-      });
-
-      if (!response.data.news?.results) {
-        console.log('No news results found in Brave API response');
+      };
+      
+      console.log(`Request URL: ${this.baseUrl}`);
+      console.log(`Request params:`, requestConfig.params);
+      
+      const response = await axios.get<BraveSearchResponse>(this.baseUrl, requestConfig);
+      
+      console.log(`Response status: ${response.status}`);
+      console.log(`Response data keys:`, Object.keys(response.data));
+      
+      if (!response.data.web?.results) {
+        console.log('No web results found in Brave API response');
+        console.log('Full response:', JSON.stringify(response.data, null, 2));
         return [];
       }
 
-      const articles = response.data.news.results.map((result) => {
+      const articles = response.data.web.results.map((result) => {
         const source = this.extractSource(result.meta_url?.hostname || result.url);
         const publishedAt = this.parseDate(result.page_age) || new Date();
         
@@ -98,6 +108,10 @@ export class NewsAPI {
       
     } catch (error) {
       console.error('Error in Brave News API:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
       return [];
     }
   }
