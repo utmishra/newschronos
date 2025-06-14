@@ -137,7 +137,8 @@ NewsTracker is a real-time news monitoring web application that provides chronol
 ## Deployment and Environment
 
 ### Environment Variables
-- `BRAVE_SEARCH_API_KEY`: Required for news search functionality
+- `VITE_BRAVE_SEARCH_API_KEY`: Required for news search functionality
+- `VITE_OPENAI_API_KEY`: Required for LLM based timeline summarisation and formatting
 - `NODE_ENV`: Set to 'development' or 'production'
 - `PORT`: Server port (defaults to 5000)
 

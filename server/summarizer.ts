@@ -3,7 +3,8 @@ import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod";
 import type { NewsArticle } from "@shared/schema";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: import.meta.env.VITE_OPENAI_API_KEY });
+console.log(`OpenAI API Key: ${import.meta.env.VITE_OPENAI_API_KEY}`)
 
 const SourceSchema = z.object({
   name: z.string(),
