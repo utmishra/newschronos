@@ -9,6 +9,7 @@ NewsTracker is a real-time news monitoring web application that provides chronol
 - **Timeline View**: Articles are displayed chronologically (newest first) in a Twitter/Google News-style feed
 - **Source Filtering**: Filter results by trusted news sources (Guardian, NYT, Verge, Wired, etc.)
 - **Live Data**: No mock data - all results are fetched live from the Brave Search API
+- **AI Timeline Summaries**: Search results can be summarized into structured timeline entries using OpenAI
 
 ## Technical Architecture
 
@@ -64,7 +65,7 @@ NewsTracker is a real-time news monitoring web application that provides chronol
 - Files: kebab-case (e.g., `news-article-card.tsx`)
 - Variables/functions: camelCase
 - Constants: SCREAMING_SNAKE_CASE
-- API endpoints: RESTful conventions (`/api/news/search`)
+- API endpoints: RESTful conventions (`/api/news/search`, `/api/news/timeline`)
 
 ### API Integration Standards
 
@@ -74,6 +75,11 @@ NewsTracker is a real-time news monitoring web application that provides chronol
 - Use proper TypeScript interfaces for API responses
 - Filter results to trusted news sources only
 - Implement reasonable timeouts (15 seconds max)
+
+#### OpenAI Timeline Summarization
+- Use the official `openai` package with Zod schema validation
+- Request structured JSON output for timeline entries
+- Limit summarization calls to 20 articles per request
 
 #### Error Handling
 - Log all API errors with timestamps and query details
@@ -140,12 +146,16 @@ NewsTracker is a real-time news monitoring web application that provides chronol
 - `BRAVE_SEARCH_API_KEY`: Required for news search functionality
 - `OPENAI_API_KEY`: Required for LLM based timeline summarisation and formatting
 - `NODE_ENV`: Set to 'development' or 'production'
-- `PORT`: Server port (defaults to 5000)
+- `PORT`: Server port (defaults to 5174)
 
 ### Build Process
 - Frontend: `npm run build` (Vite builds to `dist/public`)
 - Backend: Runs with `tsx` in development, `node` in production
 - No database migrations required (uses in-memory storage)
+
+### Running the App
+- Development: `npm run dev` (frontend) and `npm run dev:server` (backend)
+- Production: `npm run start` (serve built client) or `npm run start:server` to run the API directly
 
 ### Performance Considerations
 - API calls typically take 1-2 seconds
@@ -168,7 +178,7 @@ NewsTracker is a real-time news monitoring web application that provides chronol
 ### Backend Issues
 - **CORS errors**: Verify Express CORS configuration
 - **TypeScript errors**: Check type definitions in shared schemas
-- **Port conflicts**: Ensure port 5000 is available
+ - **Port conflicts**: Ensure port 5174 is available
 
 ## Feature Development Guidelines
 
@@ -228,6 +238,6 @@ NewsTracker is a real-time news monitoring web application that provides chronol
 
 ---
 
-**Last Updated**: June 13, 2025
+**Last Updated**: June 14, 2025
 **Version**: 1.0.0
 **Maintainer**: AI Agent Development Team
