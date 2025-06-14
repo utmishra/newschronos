@@ -28,6 +28,22 @@ export interface NewsArticle {
   topic: string;
 }
 
+export interface TimelineEntry {
+  date: string;
+  mainTitle: string;
+  description: string;
+  coverImage?: string | null;
+  sources: { name: string; url: string }[];
+}
+
+export interface TimelineSummary {
+  entries: TimelineEntry[];
+  query: string;
+  resultCount: number;
+  sources?: string[];
+  daysBack: number;
+}
+
 export interface PopularSearch {
   id: number;
   query: string;

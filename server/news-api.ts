@@ -35,9 +35,10 @@ interface BraveSearchResponse {
 
 export class NewsAPI {
   private readonly apiKey = process.env.BRAVE_SEARCH_API_KEY;
-  private readonly baseUrl = 'https://api.search.brave.com/res/v1/web/search';
+  private readonly baseUrl = 'https://api.search.brave.com/res/v1/web/search';  
   
   async searchNews(query: string, daysBack: number = 7): Promise<ScrapedArticle[]> {
+    console.log(`Brave Search API Key: ${this.apiKey}`);
     if (!this.apiKey) {
       console.error('Brave Search API key not found');
       return [];
@@ -62,9 +63,6 @@ export class NewsAPI {
         },
         timeout: 15000
       };
-      
-      console.log(`Request URL: ${this.baseUrl}`);
-      console.log(`Request params:`, requestConfig.params);
       
       const response = await axios.get<BraveSearchResponse>(this.baseUrl, requestConfig);
       

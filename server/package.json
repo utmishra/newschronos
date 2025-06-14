@@ -1,0 +1,24 @@
+{
+  "name": "newschronos-server",
+  "version": "1.0.0",
+  "description": "News Timeline Summariser",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "bun run index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "news",
+    "ai",
+    "timeline",
+    "news-feed"
+  ],
+  "author": "Utkarsh Mishra",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19"
+  }
+}
