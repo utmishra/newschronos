@@ -34,7 +34,7 @@ interface BraveSearchResponse {
 }
 
 export class NewsScraper {
-  private readonly apiKey = import.meta.env.VITE_BRAVE_SEARCH_API_KEY;
+  private readonly apiKey = process.env.BRAVE_SEARCH_API_KEY;
   private readonly baseUrl = 'https://api.search.brave.com/res/v1/news/search';
   
   async scrapeNews(query: string, daysBack: number = 7): Promise<ScrapedArticle[]> {

@@ -4,17 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import FilterBar from "./filter-bar";
 import type { SearchFilters, TimelineSummary, TimelineEntry } from "@/lib/types";
+import { forwardRef, useImperativeHandle } from "react";
 
 interface NewsTimelineProps {
   searchFilters: SearchFilters;
   onFiltersChange: (filters: SearchFilters) => void;
 }
 
-export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTimelineProps) {
+const NewsTimeline = forwardRef(function NewsTimeline({ searchFilters, onFiltersChange }: NewsTimelineProps, ref) {
 
-  const { data: timeline, isLoading, error } = useQuery<TimelineSummary>({
-    queryKey: ["/api/news/timeline", searchFilters.query, searchFilters.sources, searchFilters.daysBack],
+  const { data: timeline, isLoading, error, refetch } = useQuery<TimelineSummary>({
+    queryKey: [`localhost:5174/api/news/timeline`, searchFilters.query, searchFilters.sources, searchFilters.daysBack],
     queryFn: async () => {
+      console.log(`Fetching news timeline with filters:`, searchFilters);
       const params = new URLSearchParams({
         query: searchFilters.query,
         daysBack: searchFilters.daysBack.toString(),
@@ -23,8 +25,8 @@ export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTim
       if (searchFilters.sources.length > 0) {
         params.append('sources', searchFilters.sources.join(','));
       }
-      
-      const response = await fetch(`/api/news/timeline?${params}`);
+      console.log(`Fetching from: localhost:5174/api/news/timeline`);
+      const response = await fetch(`http://localhost:5174/api/news/timeline?${params}`);
       if (!response.ok) {
         throw new Error('Failed to fetch news');
       }
@@ -32,10 +34,12 @@ export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTim
       const data = await response.json();
 
       return data;
-    },
-    enabled: !!searchFilters.query,
+    }
   });
 
+  useImperativeHandle(ref, () => ({
+    refetchTimeline: refetch,
+  }));
 
   if (error) {
     return (
@@ -134,7 +138,7 @@ export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTim
             </div>
           ) : (
             <div className="space-y-6">
-              {timeline.entries.map((entry: TimelineEntry) => (
+              {timeline.entries.reverse().map((entry: TimelineEntry) => (
                 <div key={entry.date + entry.mainTitle} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex">
                   {entry.coverImage && (
                     <div className="w-48 hidden sm:block mr-6">
@@ -168,4 +172,6 @@ export default function NewsTimeline({ searchFilters, onFiltersChange }: NewsTim
       ) : null}
     </main>
   );
-}
+});
+
+export default NewsTimeline;

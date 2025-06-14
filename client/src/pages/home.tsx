@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Header from "@/components/header";
 import SearchSection from "@/components/search-section";
 import NewsTimeline from "@/components/news-timeline";
@@ -13,9 +13,16 @@ export default function Home() {
 
   const [isSearchActive, setIsSearchActive] = useState(false);
 
+  // Add a ref to NewsTimeline
+  const timelineRef = useRef<{ refetchTimeline: () => void }>(null);
+
   const handleSearch = (filters: SearchFilters) => {
     setSearchFilters(filters);
     setIsSearchActive(true);
+    // Call refetchTimeline after filters are set
+    setTimeout(() => {
+      timelineRef.current?.refetchTimeline();
+    }, 0);
   };
 
   return (
@@ -24,6 +31,7 @@ export default function Home() {
       <SearchSection onSearch={handleSearch} />
       {isSearchActive && (
         <NewsTimeline 
+          ref={timelineRef}
           searchFilters={searchFilters}
           onFiltersChange={setSearchFilters}
         />
